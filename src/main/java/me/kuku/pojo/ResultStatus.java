@@ -12,10 +12,14 @@ public enum ResultStatus {
 	DATA_EXISTS(502, "数据已存在"),
 	DATA_NOT_EXISTS(503, "数据不存在"),
 	NOT_SCANNED(504, "二维码未扫描"),
+	QRCODE_NOT_SCANNED(504, "二维码未扫描"),
 	EXPIRED(505, "二维码已失效"),
+	QRCODE_EXPIRED(505, "二维码已失效"),
 	CONFIG_ERROR(506, "配置文件错误"),
 	SCANNED(507, "二维码已扫描"),
-	COOKIE_EXPIRED(508, "cookie已失效");
+	COOKIE_EXPIRED(508, "cookie已失效"),
+	DYNAMIC_NOT_FOUNT(509, "动态没找到"),
+	QRCODE_IS_SCANNED(510, "二维码已扫描");
 
 
 	private final Integer code;
