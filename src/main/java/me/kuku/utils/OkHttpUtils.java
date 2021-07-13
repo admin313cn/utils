@@ -276,6 +276,10 @@ public class OkHttpUtils {
         return RequestBody.create(jsonStr, MEDIA_JSON);
     }
 
+    public static RequestBody addJson(JSONObject jsonObject){
+        return RequestBody.create(jsonObject.toJSONString(), MEDIA_JSON);
+    }
+
     public static Headers addSingleHeader(String name, String value){
         return new Headers.Builder().add(name, value).build();
     }
