@@ -19,7 +19,8 @@ public enum ResultStatus {
 	SCANNED(507, "二维码已扫描"),
 	COOKIE_EXPIRED(508, "cookie已失效"),
 	DYNAMIC_NOT_FOUNT(509, "动态没找到"),
-	QRCODE_IS_SCANNED(510, "二维码已扫描");
+	QRCODE_IS_SCANNED(510, "二维码已扫描"),
+	QRCODE_IS_REFUSE(511, "二维码已被拒绝");
 
 
 	private final Integer code;
