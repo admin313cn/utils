@@ -6,6 +6,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -89,6 +90,15 @@ public class AESUtils {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static byte[] aesEncrypt(String aesKey, String plain){
+        return aesEncrypt(aesKey.getBytes(StandardCharsets.UTF_8), plain.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String aesEncryptBase(String aesKey, String plain){
+        byte[] bytes = aesEncrypt(aesKey, plain);
+        return Base64.getEncoder().encodeToString(bytes);
     }
 
     /**

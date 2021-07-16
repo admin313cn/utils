@@ -43,6 +43,10 @@ public class MyUtils {
 		return random("1234567890abcdefghijklmnopqrstuvwxyz", length);
 	}
 
+	public static String random(int length){
+		return random("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789", length);
+	}
+
 	public static String randomNum(int length){
 		return random("1234567890", length);
 	}

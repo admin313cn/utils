@@ -19,6 +19,7 @@ public class OkHttpUtils {
     private static final MediaType MEDIA_JSON = MediaType.get("application/json;charset=utf-8");
     private static final MediaType MEDIA_STREAM = MediaType.get("application/octet-stream");
     private static final MediaType MEDIA_X_JSON = MediaType.get("text/x-json");
+    private static final MediaType MEDIA_ENCRYPTED_JSON = MediaType.get("application/encrypted-json;charset=UTF-8");
     private static final long TIME_OUT = 10L;
 
     private static final OkHttpClient okHttpClient;
@@ -62,6 +63,10 @@ public class OkHttpUtils {
         return post(url, mapToFormBody(map), headers);
     }
 
+    public static Response post(String url, Map<String, String> map, Map<String, String> headerMap) throws IOException {
+        return post(url, mapToFormBody(map), addHeaders(headerMap));
+    }
+
     public static Response post(String url, Map<String, String> map) throws IOException {
         return post(url, map, emptyHeaders());
     }
@@ -79,6 +84,18 @@ public class OkHttpUtils {
         return put(url, requestBody, emptyHeaders());
     }
 
+    public static Response put(String url, Map<String, String> map) throws IOException {
+        return put(url, mapToFormBody(map), emptyHeaders());
+    }
+
+    public static Response put(String url, Map<String, String> map, Map<String, String> headers) throws IOException {
+        return put(url, mapToFormBody(map), addHeaders(headers));
+    }
+
+    public static Response put(String url, Map<String, String> map, Headers headers) throws IOException {
+        return put(url, mapToFormBody(map), headers);
+    }
+
     private static Response delete(String url, RequestBody requestBody, Headers headers) throws IOException {
         Request request = new Request.Builder().url(url).delete(requestBody).headers(headers).build();
         return okHttpClient.newCall(request).execute();
@@ -90,6 +107,10 @@ public class OkHttpUtils {
 
     public static Response delete(String url, Map<String, String> map, Headers headers) throws IOException {
         return delete(url, mapToFormBody(map), headers);
+    }
+
+    public static Response delete(String url, Map<String, String> map, Map<String, String> headerMap) throws IOException {
+        return delete(url, mapToFormBody(map), addHeaders(headerMap));
     }
 
     public static Response delete(String url, Map<String, String> map) throws IOException {
@@ -107,6 +128,10 @@ public class OkHttpUtils {
 
     public static Response patch(String url, Map<String, String> map, Headers headers) throws IOException {
         return patch(url, mapToFormBody(map), headers);
+    }
+
+    public static Response patch(String url, Map<String, String> map, Map<String, String> headerMap) throws IOException {
+        return patch(url, mapToFormBody(map), addHeaders(headerMap));
     }
 
     public static Response patch(String url, Map<String, String> map) throws IOException {
@@ -278,6 +303,10 @@ public class OkHttpUtils {
 
     public static RequestBody addJson(JSONObject jsonObject){
         return RequestBody.create(jsonObject.toJSONString(), MEDIA_JSON);
+    }
+
+    public static RequestBody addEncryptedJson(String str){
+        return RequestBody.create(str, MEDIA_ENCRYPTED_JSON);
     }
 
     public static Headers addSingleHeader(String name, String value){
