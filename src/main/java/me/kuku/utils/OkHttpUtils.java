@@ -372,7 +372,7 @@ public class OkHttpUtils {
             cookie = MyUtils.regex(".*?;", cookie);
             if (cookie == null) continue;
             String[] arr = cookie.split("=");
-            if (arr.length != 2) continue;
+            if (arr.length < 2) continue;
             if (arr[1].equals(";")) continue;
             sb.append(cookie).append(" ");
         }
@@ -408,7 +408,16 @@ public class OkHttpUtils {
     }
 
     public static String getCookie(String cookie, String name){
-        return MyUtils.regex(name + "=", "; ", cookie);
+        String[] arr = cookie.split(";");
+        for (String str : arr) {
+            String[] newArr = str.split("=");
+            if (newArr.length > 1){
+                if (newArr[0].equals(name)){
+                    return newArr[1];
+                }
+            }
+        }
+        return null;
     }
 
     public static Map<String, String> getCookie(String cookie, String...name){
