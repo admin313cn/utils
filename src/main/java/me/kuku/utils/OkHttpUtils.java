@@ -67,6 +67,10 @@ public class OkHttpUtils {
         return post(url, mapToFormBody(map), addHeaders(headerMap));
     }
 
+    public static Response post(String url, RequestBody requestBody, Map<String, String> headerMap) throws IOException {
+        return post(url, requestBody, addHeaders(headerMap));
+    }
+
     public static Response post(String url, Map<String, String> map) throws IOException {
         return post(url, map, emptyHeaders());
     }
@@ -113,6 +117,10 @@ public class OkHttpUtils {
         return delete(url, mapToFormBody(map), addHeaders(headerMap));
     }
 
+    public static Response delete(String url, RequestBody requestBody, Map<String, String> headerMap) throws IOException {
+        return delete(url, requestBody, addHeaders(headerMap));
+    }
+
     public static Response delete(String url, Map<String, String> map) throws IOException {
         return delete(url, map, emptyHeaders());
     }
@@ -156,6 +164,11 @@ public class OkHttpUtils {
         return getBytes(response);
     }
 
+    public static byte[] getBytes(String url, Map<String, String> headers) throws IOException {
+        Response response = get(url, headers);
+        return getBytes(response);
+    }
+
     public static byte[] getBytes(Response response) throws IOException {
         return Objects.requireNonNull(response.body()).bytes();
     }
@@ -165,6 +178,11 @@ public class OkHttpUtils {
     }
 
     public static InputStream getByteStream(String url, Headers headers) throws IOException {
+        Response response = get(url, headers);
+        return getByteStream(response);
+    }
+
+    public static InputStream getByteStream(String url, Map<String, String> headers) throws IOException {
         Response response = get(url, headers);
         return getByteStream(response);
     }
@@ -182,6 +200,11 @@ public class OkHttpUtils {
         return getByteStr(response);
     }
 
+    public static ByteString getByteStr(String url, Map<String, String> headers) throws IOException {
+        Response response = get(url, headers);
+        return getByteStr(response);
+    }
+
     public static ByteString getByteStr(String url) throws IOException {
         return getByteStr(url, emptyHeaders());
     }
@@ -191,6 +214,11 @@ public class OkHttpUtils {
     }
 
     public static String getStr(String url, Headers headers) throws IOException {
+        Response response = get(url, headers);
+        return getStr(response);
+    }
+
+    public static String getStr(String url, Map<String, String> headers) throws IOException {
         Response response = get(url, headers);
         return getStr(response);
     }
@@ -219,12 +247,22 @@ public class OkHttpUtils {
         return getStr(response);
     }
 
+    public static String postStr(String url, RequestBody requestBody, Map<String, String> headers) throws IOException {
+        Response response = post(url, requestBody, headers);
+        return getStr(response);
+    }
+
     public static String postStr(String url, RequestBody requestBody) throws IOException {
         Response response = post(url, requestBody, emptyHeaders());
         return getStr(response);
     }
 
     public static JSONObject postJson(String url, RequestBody requestBody, Headers headers) throws IOException {
+        Response response = post(url, requestBody, headers);
+        return getJson(response);
+    }
+
+    public static JSONObject postJson(String url, RequestBody requestBody, Map<String, String> headers) throws IOException {
         Response response = post(url, requestBody, headers);
         return getJson(response);
     }
@@ -247,11 +285,21 @@ public class OkHttpUtils {
         return getStr(response);
     }
 
+    public static String postStr(String url, Map<String, String> map,Map<String, String> headers) throws IOException {
+        Response response = post(url, mapToFormBody(map), headers);
+        return getStr(response);
+    }
+
     public static String postStr(String url, Map<String, String> map) throws IOException {
         return postStr(url, map, emptyHeaders());
     }
 
     public static String deleteStr(String url, Map<String, String> map, Headers headers) throws IOException {
+        Response response = delete(url, mapToFormBody(map), headers);
+        return getStr(response);
+    }
+
+    public static String deleteStr(String url, Map<String, String> map, Map<String, String> headers) throws IOException {
         Response response = delete(url, mapToFormBody(map), headers);
         return getStr(response);
     }
@@ -265,12 +313,22 @@ public class OkHttpUtils {
         return JSON.parseObject(str);
     }
 
+    public static JSONObject postJson(String url, Map<String, String> map, Map<String, String> headers) throws IOException {
+        String str = postStr(url, map, headers);
+        return JSON.parseObject(str);
+    }
+
     public static JSONObject postJson(String url, Map<String, String> map) throws IOException {
         String str = postStr(url, map, emptyHeaders());
         return JSON.parseObject(str);
     }
 
     public static JSONObject deleteJson(String url, Map<String, String> map, Headers headers) throws IOException {
+        String str = deleteStr(url, map, headers);
+        return JSON.parseObject(str);
+    }
+
+    public static JSONObject deleteJson(String url, Map<String, String> map, Map<String, String> headers) throws IOException {
         String str = deleteStr(url, map, headers);
         return JSON.parseObject(str);
     }
