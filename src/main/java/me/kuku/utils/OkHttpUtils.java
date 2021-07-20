@@ -466,13 +466,16 @@ public class OkHttpUtils {
     }
 
     public static String getCookie(String cookie, String name){
-        String[] arr = cookie.split(";");
+        String[] arr = cookie.split("; ");
+        if (arr.length == 0) arr = cookie.split(";");
         for (String str : arr) {
             String[] newArr = str.split("=");
-            if (newArr.length > 1){
-                if (newArr[0].equals(name)){
-                    return newArr[1];
+            if (newArr.length > 1 && newArr[0].trim().equals(name)){
+                StringBuilder sb = new StringBuilder();
+                for (int i = 1; i < newArr.length; i++){
+                    sb.append(newArr[i]);
                 }
+                return sb.toString();
             }
         }
         return null;
