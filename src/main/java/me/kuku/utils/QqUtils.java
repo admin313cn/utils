@@ -123,6 +123,8 @@ public class QqUtils {
 		Map<String, String> map = new HashMap<>();
 		map.put("p_skey", OkHttpUtils.getCookie(cookie, "p_skey"));
 		map.put("pt4_token", OkHttpUtils.getCookie(cookie, "pt4_token"));
+		map.put("pt_oauth_token", OkHttpUtils.getCookie(cookie, "pt_oauth_token"));
+		map.put("pt_login_type", OkHttpUtils.getCookie(cookie, "pt_login_type"));
 		return map;
 	}
 }

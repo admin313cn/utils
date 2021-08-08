@@ -55,6 +55,16 @@ public class Result<T> {
         }};
     }
 
+    public static Map<String, String> map(String key, String value){
+        return new HashMap<String, String>(){{
+            put(key, value);
+        }};
+    }
+
+    public static Map<String, String> map(String value){
+        return map("data", value);
+    }
+
     public static <T> Result<T> failure(String message){
         return new Result<>(500, message, null);
     }

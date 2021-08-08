@@ -16,7 +16,7 @@ public class QqQrCodeLoginUtils {
 
 	public static QqLoginQrcode getQrCode(long appId, int daId, long ptAid) throws IOException {
 		Response response = OkHttpUtils.get(String.format("https://ssl.ptlogin2.qq.com/ptqrshow?appid=%s&e=2&l=M&s=3&d=72&v=4&t=0.%s&daid=%s&pt_3rd_aid=0" + ptAid,
-				appId, MyUtils.randomStr(17), daId));
+				appId, MyUtils.randomStr(17), daId), OkHttpUtils.addReferer("https://xui.ptlogin2.qq.com/"));
 		byte[] bytes = OkHttpUtils.getBytes(response);
 		String cookie = OkHttpUtils.getCookie(response);
 		String sig = OkHttpUtils.getCookie(cookie, "qrsig");
@@ -43,7 +43,8 @@ public class QqQrCodeLoginUtils {
 				Result<String> result = QqUtils.getResultUrl(str);
 				Map<String, String> map = QqUtils.getKey(result.getData());
 				QqLoginPojo qqLoginPojo = new QqLoginPojo(qq, cookieMap.get("skey"), map.get("p_skey"),
-						cookieMap.get("superkey"), cookieMap.get("supertoken"), map.get("pt4_token"));
+						cookieMap.get("superkey"), cookieMap.get("supertoken"), map.get("pt4_token"),
+						map.get("pt_oauth_token"), map.get("pt_login_type"));
 				return Result.success(qqLoginPojo);
 			case 66:
 			case 67:
@@ -70,7 +71,7 @@ public class QqQrCodeLoginUtils {
 		String ui = UUID.randomUUID().toString();
 		map.put("ui", ui);
 		Response response = OkHttpUtils.post("https://graph.qq.com/oauth2.0/authorize",
-				map, OkHttpUtils.addHeaders(qqLoginPojo.getCookieWithPs() + "ui=" + ui + "; ", "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&client_id=" + clientId + "&response_type=code&scope=all&redirect_uri=" + URLEncoder.encode(redirectUri, "utf-8"),
+				map, OkHttpUtils.addHeaders(qqLoginPojo.getAuthorizeCookie() + "ui=" + ui + "; ", "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&client_id=" + clientId + "&response_type=code&scope=all&redirect_uri=" + URLEncoder.encode(redirectUri, "utf-8"),
 						UA.PC));
 		response.close();
 		String url = response.header("location");

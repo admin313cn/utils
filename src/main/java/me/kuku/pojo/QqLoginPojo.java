@@ -16,6 +16,8 @@ public class QqLoginPojo {
 	private String superKey;
 	private String superToken;
 	private String pt4Token;
+	private String ptOauthToken;
+	private String ptLoginType;
 
 	@JSONField(serialize = false)
 	public String getCookie(){
@@ -65,5 +67,11 @@ public class QqLoginPojo {
 	@JSONField(serialize = false)
 	public String getToken2(){
 		return String.valueOf(QqUtils.getToken2(superToken));
+	}
+
+	@JSONField(serialize = false)
+	public String getAuthorizeCookie(){
+		return String.format("p_skey=%s; p_uin=o0%s; pt_oauth_token=%s; pt_login_type=%s; pt4_token=%s; ",
+				psKey, qq, ptOauthToken, ptLoginType, pt4Token);
 	}
 }
