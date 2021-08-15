@@ -20,6 +20,7 @@ public class OkHttpUtils {
     private static final MediaType MEDIA_STREAM = MediaType.get("application/octet-stream");
     private static final MediaType MEDIA_X_JSON = MediaType.get("text/x-json");
     private static final MediaType MEDIA_ENCRYPTED_JSON = MediaType.get("application/encrypted-json;charset=UTF-8");
+    private static final MediaType MEDIA_TEXT = MediaType.get("text/plain;charset=UTF-8");
     private static final long TIME_OUT = 10L;
 
     private static final OkHttpClient okHttpClient;
@@ -357,6 +358,15 @@ public class OkHttpUtils {
 
     public static RequestBody addJson(String jsonStr){
         return RequestBody.create(jsonStr, MEDIA_JSON);
+    }
+
+    public static RequestBody addText(String text){
+        return RequestBody.create(text, MEDIA_TEXT);
+    }
+
+    public static RequestBody addBody(String text, String contentType){
+        MediaType mediaType = MediaType.get(contentType);
+        return RequestBody.create(text, mediaType);
     }
 
     public static RequestBody addJson(JSONObject jsonObject){

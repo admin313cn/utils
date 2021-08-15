@@ -3,6 +3,7 @@ package me.kuku.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import me.kuku.pojo.Result;
+import me.kuku.pojo.TencentCaptcha;
 import me.kuku.pojo.UA;
 import okhttp3.Response;
 
@@ -91,7 +92,7 @@ public class QCloudCaptchaUtils {
 		return map;
 	}
 
-	private static Result<Map<String, String>> identifyCaptcha(String appId, Map<String, String> map) throws IOException {
+	private static Result<TencentCaptcha> identifyCaptcha(String appId, Map<String, String> map) throws IOException {
 		Response response = OkHttpUtils.get("https://ssl.captcha.qq.com/dfpReg?0=Mozilla%2F5.0%20(Linux%3B%20Android%2011%3B%20RMX3031%20Build%2FRP1A.200720.011%3B%20wv)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Version%2F4.0%20Chrome%2F92.0.4515.131%20Mobile%20Safari%2F537.36&1=zh-CN&2=2.2&3=2.2&4=24&5=8&6=-480&7=1&8=1&9=1&10=u&11=function&12=u&13=Linux%20aarch64&14=0&15=e466827d3971a555235e032f6e6f19d2&16=56e0da52b1f1919311eedd317fddc640&17=a1f937b6ee969f22e6122bdb5cb48bde&18=10x1x10x1&19=511ad6d3a33f320317431bb33c1a656e&20=8003602480036024&21=3%3B&22=1%3B1%3B1%3B1%3B1%3B1%3B1%3B0%3B1%3Bobject0UTF-8&23=0&24=5%3B1&25=2ef8be5d2413046bf04e52c22e8e3b90&26=48000_2_1_0_2_explicit_speakers&27=c8205b36aba2b1f3b581d8170984e918&28=Mali-G77MC9&29=cf83512421699aed3e43c7b85781492d&30=a23a38527a38dcea2f63d5d078443f78&31=0&32=0&33=0&34=0&35=0&36=0&37=0&38=0&39=0&40=0&41=0&42=0&43=0&44=0&45=0&46=0&47=0&48=0&49=0&50=0&fesig=8623683915260939468&ut=816&appid=0&refer=https%3A%2F%2Fcaptcha.guard.qcloud.com%2Fcap_union_new_show&domain=captcha.guard.qcloud.com&fph=110081160F38E68FA07E26284CFABE18DB1934D5BE248228DB52D976559E679DEBD0E94968A52DECFF10950B0CA14F1B15CE&fpv=0.0.15&ptcz=&callback=_fp_020387",
 				OkHttpUtils.addReferer(map.get("url")));
 		String cookie = OkHttpUtils.getCookie(response);
@@ -140,16 +141,13 @@ public class QCloudCaptchaUtils {
 		paramsMap.put("vmData", "");
 		JSONObject jsonObject = OkHttpUtils.postJson("https://captcha.guard.qcloud.com/cap_union_new_verify", paramsMap,
 				OkHttpUtils.addHeaders(cookie, map.get("url"), UA.PIXEL));
-		System.out.println(jsonObject);
 		if (jsonObject.getInteger("errorCode") == 0){
-			Map<String, String> resultMap = new HashMap<>();
-			resultMap.put("ticket", jsonObject.getString("ticket"));
-			resultMap.put("randStr", jsonObject.getString("randstr"));
-			return Result.success(resultMap);
+			TencentCaptcha tencentCaptcha = new TencentCaptcha(jsonObject.getString("ticket"), jsonObject.getString("randstr"));
+			return Result.success(tencentCaptcha);
 		}else return Result.failure(400, "验证码识别失败，请稍后重试！！");
 	}
 
-	public static Result<Map<String, String>> identify(String appId, String sig) throws IOException {
+	public static Result<TencentCaptcha> identify(String appId, String sig) throws IOException {
 		Map<String, String> map = getCaptcha(appId, sig);
 		return identifyCaptcha(appId, map);
 	}
