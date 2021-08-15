@@ -69,7 +69,7 @@ public class TenCentCaptchaUtils {
         return result;
     }
 
-    public static int getWidth(String imageAUrl, String imageBUrl) throws IOException {
+    private static int getWidth(String imageAUrl, String imageBUrl) throws IOException {
         BufferedImage imageA = ImageIO.read(new URL(imageAUrl));
         BufferedImage imageB = ImageIO.read(new URL(imageBUrl));
         int imgWidth = imageA.getWidth();
