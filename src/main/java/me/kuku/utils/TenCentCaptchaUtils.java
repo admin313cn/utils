@@ -16,7 +16,6 @@ import java.util.Map;
 
 public class TenCentCaptchaUtils {
 
-    private final static String ua = "TW96aWxsYS81LjAgKExpbnV4OyBBbmRyb2lkIDEwOyBWMTkxNEEgQnVpbGQvUVAxQS4xOTA3MTEuMDIwOyB3dikgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgVmVyc2lvbi80LjAgQ2hyb21lLzY2LjAuMzM1OS4xMjYgTVFRQnJvd3Nlci82LjIgVEJTLzA0NTEzMiBNb2JpbGUgU2FmYXJpLzUzNy4zNiBWMV9BTkRfU1FfOC4zLjBfMTM2Ml9ZWUJfRCBRUS84LjMuMC40NDgwIE5ldFR5cGUvNEcgV2ViUC8wLjMuMCBQaXhlbC8xMDgwIFN0YXR1c0JhckhlaWdodC84NSBTaW1wbGVVSVN3aXRjaC8wIFFRVGhlbWUvMTAwMA==";
     private final static String en_ua = "TW96aWxsYS81LjAgKExpbnV4OyBBbmRyb2lkIDEwOyBWMTkxNEEgQnVpbGQvUVAxQS4xOTA3MTEuMDIwOyB3dikgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgVmVyc2lvbi80LjAgQ2hyb21lLzY2LjAuMzM1OS4xMjYgTVFRQnJvd3Nlci82LjIgVEJTLzA0NTEzMiBNb2JpbGUgU2FmYXJpLzUzNy4zNiBWMV9BTkRfU1FfOC4zLjBfMTM2Ml9ZWUJfRCBRUS84LjMuMC40NDgwIE5ldFR5cGUvNEcgV2ViUC8wLjMuMCBQaXhlbC8xMDgwIFN0YXR1c0JhckhlaWdodC84NSBTaW1wbGVVSVN3aXRjaC8wIFFRVGhlbWUvMTAwMA%3D%3D";
 
     private static String getCaptchaPictureUrl(Long appId, String imageId, String sess, String sid, int index){
@@ -30,7 +29,7 @@ public class TenCentCaptchaUtils {
         Map<String, String> map = new HashMap<>();
         map.put("script", base64Str);
         map.put("width", String.valueOf(width));
-        JSONObject jsonObject = OkHttpUtils.postJson("https://api.kuku.me/tool/collectByWidth", map);
+        JSONObject jsonObject = OkHttpUtils.postJson("https://apicf.kuku.me/tool/collectByWidth", map);
         String collectData = URLDecoder.decode(jsonObject.getString("collectData"), "utf-8");
         String eks = jsonObject.getString("eks");
         String length = String.valueOf(collectData.length());
@@ -66,9 +65,10 @@ public class TenCentCaptchaUtils {
                         + "&grayscale=1&clientype=1&cap_cd=&uid=&wxLang=&lang=zh&entry_url=" + refererUrl + "&js=%2Ftcaptcha-frame.a75be429.js&subsid=3&callback=_aq_587&sess=",
                 OkHttpUtils.addHeaders("", "https://xui.ptlogin2.qq.com/", UA.QQ));
         String sess = jsonObject.getString("sess");
+        String createIframeStart = String.valueOf(System.currentTimeMillis());
         String showUrl = "https://t.captcha.qq.com/cap_union_new_show?aid=" + appId + "&protocol=https&accver=1&showtype=popup&ua=" + en_ua
                 + "&noheader=0&fb=1&enableDarkMode=0&sid=" + sid + "&grayscale=1&clientype=1&sess=" + sess
-                + "&fwidth=0&wxLang=&tcScale=1&uid=&cap_cd=&rnd=" + MyUtils.randomNum(6) + "&prehandleLoadTime=41&createIframeStart=" + System.currentTimeMillis() + "&subsid=4";
+                + "&fwidth=0&wxLang=&tcScale=1&uid=&cap_cd=&rnd=" + MyUtils.randomNum(6) + "&prehandleLoadTime=41&createIframeStart=" + createIframeStart + "&subsid=4";
         String html = OkHttpUtils.getStr(showUrl,
                 OkHttpUtils.addHeaders("", "https://xui.ptlogin2.qq.com/", UA.QQ));
         String height = MyUtils.regex("spt:\"", "\"", html);
@@ -76,7 +76,7 @@ public class TenCentCaptchaUtils {
         String collectName = MyUtils.regex("collectdata:\"", "\"", html);
         String imageId = MyUtils.regex("image=", "\"", html);
         String suffixUrl = MyUtils.regex("\"tdc\",\"/", "\"", html);
-        String pow = MyUtils.regex("prefix:\"", "\"", html) + "218";
+        String pow = MyUtils.regex("prefix:\"", "\"", html) + "808";
         String nonce = MyUtils.regex("nonce:\"", "\"", html);
         String imageAUrl = getCaptchaPictureUrl(appId, imageId, sess, sid, 1);
         String imageBUrl = getCaptchaPictureUrl(appId, imageId, sess, sid, 0);
@@ -93,6 +93,7 @@ public class TenCentCaptchaUtils {
         map.put("pow", pow);
         map.put("nonce", nonce);
         map.put("showUrl", showUrl);
+        map.put("createIframeStart",createIframeStart);
         map.putAll(collect);
         return map;
     }
@@ -103,7 +104,7 @@ public class TenCentCaptchaUtils {
         paramsMap.put("protocol", "https");
         paramsMap.put("accver", "1");
         paramsMap.put("showtype", "popup");
-        paramsMap.put("ua", ua);
+        paramsMap.put("ua", en_ua);
         paramsMap.put("noheader", "0");
         paramsMap.put("fb", "1");
         paramsMap.put("enableDarkMode", "0");
@@ -117,16 +118,16 @@ public class TenCentCaptchaUtils {
         paramsMap.put("uid", "");
         paramsMap.put("cap_cd", "");
         paramsMap.put("rnd", MyUtils.randomNum(6));
-        paramsMap.put("prehandleLoadTime", "43");
-        paramsMap.put("createIframeStart", String.valueOf(System.currentTimeMillis()));
-        paramsMap.put("subsid", "6");
+        paramsMap.put("prehandleLoadTime", "25");
+        paramsMap.put("createIframeStart", map.get("createIframeStart"));
+        paramsMap.put("subsid", "2");
         paramsMap.put("cdata", "0");
         paramsMap.put("ans", map.get("ans"));
         paramsMap.put("vsig", "");
         paramsMap.put("websig", "");
         paramsMap.put("subcapclass", "");
         paramsMap.put("pow_answer", map.get("pow"));
-        paramsMap.put("pow_calc_time", "13");
+        paramsMap.put("pow_calc_time", "17");
         paramsMap.put(map.get("collectName"), map.get("collectData"));
         paramsMap.put("tlg", map.get("length"));
         paramsMap.put("fpinfo", "");
