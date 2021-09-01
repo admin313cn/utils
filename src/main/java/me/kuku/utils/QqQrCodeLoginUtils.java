@@ -1,9 +1,6 @@
 package me.kuku.utils;
 
-import me.kuku.pojo.QqLoginPojo;
-import me.kuku.pojo.QqLoginQrcode;
-import me.kuku.pojo.Result;
-import me.kuku.pojo.UA;
+import me.kuku.pojo.*;
 import okhttp3.Response;
 
 import java.io.IOException;
@@ -23,8 +20,16 @@ public class QqQrCodeLoginUtils {
 		return new QqLoginQrcode(bytes, sig);
 	}
 
+	public static QqLoginQrcode getQrcode(QqApp qqApp) throws IOException {
+		return getQrCode(qqApp.getAppId(), qqApp.getDaId(), qqApp.getPtAid());
+	}
+
 	public static QqLoginQrcode getQrCode() throws IOException {
 		return getQrCode(549000912L, 5, 0);
+	}
+
+	public static Result<QqLoginPojo> checkQrcode(QqApp qqApp, String url, String sig) throws IOException {
+		return checkQrCode(qqApp.getAppId(), qqApp.getDaId(), qqApp.getPtAid(), url, sig);
 	}
 
 	public static Result<QqLoginPojo> checkQrCode(long appId, int daId, long ptAid, String url, String sig) throws IOException {
@@ -51,6 +56,14 @@ public class QqQrCodeLoginUtils {
 				return Result.failure(0, "未失效或者验证中！");
 			default: return Result.failure(MyUtils.regex("','','0','", "', ''", str), null);
 		}
+	}
+
+	public static Result<String> authorize(QqApp qqApp, String sig, String state, String redirectUri) throws IOException {
+		Result<QqLoginPojo> loginResult = checkQrCode(qqApp.getAppId(), qqApp.getDaId(), qqApp.getPtAid(), "https://graph.qq.com/oauth2.0/login_jump", sig);
+		if (loginResult.isSuccess()){
+			QqLoginPojo qqLoginPojo = loginResult.getData();
+			return authorize(qqLoginPojo, qqApp.getPtAid(), state, redirectUri);
+		}else return Result.failure(loginResult.getCode(), loginResult.getMessage(), null);
 	}
 
 	@SuppressWarnings("ConstantConditions")

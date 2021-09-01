@@ -9,6 +9,8 @@ import okio.ByteString;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -579,5 +581,25 @@ public class OkHttpUtils {
 
     public static RequestBody getStreamBody(byte[] bytes){
         return getStreamBody(UUID.randomUUID().toString(), bytes);
+    }
+
+    public static String urlParams(Map<String, String> map){
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> entry: map.entrySet()){
+            try {
+                sb.append(entry.getKey()).append("=").append(URLEncoder.encode(entry.getValue(), "utf-8")).append("&");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String urlParamsEn(Map<String, String> map){
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> entry: map.entrySet()){
+            sb.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
+        }
+        return sb.toString();
     }
 }

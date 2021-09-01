@@ -43,17 +43,6 @@ public class QqPasswordConnectLoginUtils {
 		}
 	}
 
-	private static String encryptPassword(Long qq, String password, String vCode) throws IOException {
-		ScriptEngine se = new ScriptEngineManager().getEngineByName("JavaScript");
-		try {
-			se.eval(OkHttpUtils.getStr("https://vkceyugu.cdn.bspapp.com/VKCEYUGU-ba222f61-ee83-431d-bf9f-7e6216a8cf41/3b7abb30-7412-4145-b42f-f126418ccc90.js"));
-			return se.eval("getmd5('" + qq + "','" + password + "','" + vCode +"')").toString();
-		} catch (ScriptException e) {
-			e.printStackTrace();
-			return "";
-		}
-	}
-
 	private static QqVc checkVc(Long qq, Long ptAid, String redirectUrl) throws IOException {
 		String graphStr = OkHttpUtils.getStr("https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=" + ptAid +
 						"&redirect_uri=" + URLEncoder.encode(redirectUrl, "utf-8") + "&scope=get_user_info",
@@ -90,7 +79,7 @@ public class QqPasswordConnectLoginUtils {
 
 	private static Result<String> login(long qq, String password, QqVc qqVc) throws IOException {
 		long idt = System.currentTimeMillis() / 1000 - 5;
-		String encryptPassword = encryptPassword(qq, password, qqVc.randomStr);
+		String encryptPassword = QqUtils.encryptPassword(qq, password, qqVc.randomStr);
 		String redirectUrl = URLEncoder.encode(URLEncoder.encode(qqVc.redirectUrl, "utf-8"), "utf-8");
 		String uri = "https://xui.ptlogin2.qq.com/ssl/pt_open_login?openlogin_data=which%3D%26refer_cgi%3Dauthorize%26response_type%3Dcode%26client_id%3D" +
 				qqVc.ptAid + "%26state%3D%26display%3D%26openapi%3D1010_1011%26switch%3D0%26src%3D1%26sdkv%3Dv1.0%26sdkp%3Dpcweb%26tid%3D" +

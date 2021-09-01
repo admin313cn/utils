@@ -3,6 +3,9 @@ package me.kuku.utils;
 import me.kuku.pojo.Result;
 import okhttp3.Response;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -126,5 +129,16 @@ public class QqUtils {
 		map.put("pt_oauth_token", OkHttpUtils.getCookie(cookie, "pt_oauth_token"));
 		map.put("pt_login_type", OkHttpUtils.getCookie(cookie, "pt_login_type"));
 		return map;
+	}
+
+	public static String encryptPassword(Long qq, String password, String vCode) throws IOException {
+		ScriptEngine se = new ScriptEngineManager().getEngineByName("JavaScript");
+		try {
+			se.eval(OkHttpUtils.getStr("https://vkceyugu.cdn.bspapp.com/VKCEYUGU-ba222f61-ee83-431d-bf9f-7e6216a8cf41/3b7abb30-7412-4145-b42f-f126418ccc90.js"));
+			return se.eval("getmd5('" + qq + "','" + password + "','" + vCode +"')").toString();
+		} catch (ScriptException e) {
+			e.printStackTrace();
+			return "";
+		}
 	}
 }

@@ -59,16 +59,16 @@ public class TenCentCaptchaUtils {
         return Math.round(Float.parseFloat(String.valueOf(r / t))) -55;
     }
 
-    private static Map<String, String> getCaptcha(Long appId, String sid, String refererUrl) throws IOException {
+    private static Map<String, String> getCaptcha(Long appId, String sid, String capCd, String qq, String refererUrl) throws IOException {
         JSONObject jsonObject = OkHttpUtils.getJsonp("https://t.captcha.qq.com/cap_union_prehandle?aid=" + appId
                         + "&protocol=https&accver=1&showtype=popup&ua=" + en_ua + "&noheader=0&fb=1&enableDarkMode=0&sid=" + sid
-                        + "&grayscale=1&clientype=1&cap_cd=&uid=&wxLang=&lang=zh&entry_url=" + refererUrl + "&js=%2Ftcaptcha-frame.a75be429.js&subsid=3&callback=_aq_587&sess=",
+                        + "&grayscale=1&clientype=1&cap_cd=" + capCd + "&uid=" + qq + "&wxLang=&lang=zh&entry_url=" + refererUrl + "&js=%2Ftcaptcha-frame.a75be429.js&subsid=3&callback=_aq_587&sess=",
                 OkHttpUtils.addHeaders("", "https://xui.ptlogin2.qq.com/", UA.QQ));
         String sess = jsonObject.getString("sess");
         String createIframeStart = String.valueOf(System.currentTimeMillis());
         String showUrl = "https://t.captcha.qq.com/cap_union_new_show?aid=" + appId + "&protocol=https&accver=1&showtype=popup&ua=" + en_ua
                 + "&noheader=0&fb=1&enableDarkMode=0&sid=" + sid + "&grayscale=1&clientype=1&sess=" + sess
-                + "&fwidth=0&wxLang=&tcScale=1&uid=&cap_cd=&rnd=" + MyUtils.randomNum(6) + "&prehandleLoadTime=41&createIframeStart=" + createIframeStart + "&subsid=4";
+                + "&fwidth=0&wxLang=&tcScale=1&uid=" + qq + "&cap_cd=" + capCd + "&rnd=" + MyUtils.randomNum(6) + "&prehandleLoadTime=41&createIframeStart=" + createIframeStart + "&subsid=4";
         String html = OkHttpUtils.getStr(showUrl,
                 OkHttpUtils.addHeaders("", "https://xui.ptlogin2.qq.com/", UA.QQ));
         String height = MyUtils.regex("spt:\"", "\"", html);
@@ -94,6 +94,8 @@ public class TenCentCaptchaUtils {
         map.put("nonce", nonce);
         map.put("showUrl", showUrl);
         map.put("createIframeStart",createIframeStart);
+        map.put("capCd", capCd);
+        map.put("qq", qq);
         map.putAll(collect);
         return map;
     }
@@ -115,8 +117,8 @@ public class TenCentCaptchaUtils {
         paramsMap.put("fwidth", "0");
         paramsMap.put("wxLang", "0");
         paramsMap.put("tcScale", "1");
-        paramsMap.put("uid", "");
-        paramsMap.put("cap_cd", "");
+        paramsMap.put("uid", map.get("qq"));
+        paramsMap.put("cap_cd", map.get("capCd"));
         paramsMap.put("rnd", MyUtils.randomNum(6));
         paramsMap.put("prehandleLoadTime", "25");
         paramsMap.put("createIframeStart", map.get("createIframeStart"));
@@ -143,8 +145,13 @@ public class TenCentCaptchaUtils {
         }else return Result.failure(400, "验证码识别失败，请稍后重试！！");
     }
 
+    public static Result<TencentCaptcha> identify(Long appId, String sid, String capCd, Long qq, String refererUrl) throws IOException {
+        Map<String, String> map = getCaptcha(appId, sid, capCd, qq.toString(), refererUrl);
+        return identifyCaptcha(appId, sid, map);
+    }
+
     public static Result<TencentCaptcha> identify(Long appId, String sid, String refererUrl) throws IOException {
-        Map<String, String> map = getCaptcha(appId, sid, refererUrl);
+        Map<String, String> map = getCaptcha(appId, sid, "", "", refererUrl);
         return identifyCaptcha(appId, sid, map);
     }
 
