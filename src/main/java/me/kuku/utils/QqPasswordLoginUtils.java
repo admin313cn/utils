@@ -44,14 +44,14 @@ public class QqPasswordLoginUtils {
 		String enRedirectUrl = URLEncoder.encode(redirectUrl, "utf-8");
 		String xuiUrl = "https://xui.ptlogin2.qq.com/cgi-bin/xlogin?appid=" +
 				qqApp.getAppId() + "&style=20&s_url=" + enRedirectUrl + "&maskOpacity=60&daid=" + qqApp.getDaId() + "&target=self";
-		Response xuiResponse = OkHttpUtils.get(xuiUrl);
+		Response xuiResponse = OkHttpUtils.get(xuiUrl, OkHttpUtils.addHeaders("", "https://vip.qq.com/", UA.CHROME_91));
 		xuiResponse.close();
-		String xuiCookie = OkHttpUtils.getCookie(xuiResponse);
+		String xuiCookie = OkHttpUtils.getCookie(xuiResponse) + "ptui_loginuin=" + qq + ";";
 		String loginSig = OkHttpUtils.getCookie(xuiCookie, "pt_login_sig");
 		Response checkResponse = OkHttpUtils.get("https://ssl.ptlogin2.qq.com/check?regmaster=&pt_tea=2&pt_vcode=1&uin=" + qq + "&appid=" +
 				qqApp.getAppId() + "&js_ver=21082415&js_type=1&login_sig=" + loginSig + "&u1=" + enRedirectUrl + "&r=0." +
 				MyUtils.randomNum(15) + "&pt_uistyle=40", OkHttpUtils.addHeaders(xuiCookie, "https://xui.ptlogin2.qq.com/",
-				UA.PC));
+				UA.CHROME_91));
 		String checkCookie = OkHttpUtils.getCookie(checkResponse);
 		String cookie = xuiCookie + checkCookie;
 		String ptdRvs = OkHttpUtils.getCookie(checkCookie, "ptdrvs");
@@ -75,11 +75,11 @@ public class QqPasswordLoginUtils {
 		String encryptPassword = QqUtils.encryptPassword(qq, password, qqVc.randomStr);
 		String url = "https://ssl.ptlogin2.qq.com/login?u=" + qq +
 				"&verifycode=" + qqVc.randomStr + "&pt_vcode_v1=" + qqVc.code + "&pt_verifysession_v1=" +
-				qqVc.ticket + "&p=" + encryptPassword + "&pt_randsalt=2&u1=" + qqVc.enRedirectUrl + "&ptredirect=0&h=1&t=1&g=1&from_ui=1&ptlang=2052&action=9-35-" +
+				qqVc.ticket + "&p=" + encryptPassword + "&pt_randsalt=2&u1=" + qqVc.enRedirectUrl + "&ptredirect=0&h=1&t=1&g=1&from_ui=1&ptlang=2052&action=3-14-" +
 				System.currentTimeMillis() + "&js_ver=21082415&js_type=1&login_sig=" + qqVc.loginSig + "&pt_uistyle=40&aid=" +
-				qqVc.appId + "&daid=" + qqVc.daId + "&ptdrvs=" + qqVc.ptdRvs + "&sid=" + qqVc.sid + "&";
+				qqVc.appId + "&daid=" + qqVc.daId + "&ptdrvs=" + qqVc.ptdRvs + "&sid=" + qqVc.sid + "&has_onekey=1&";
 		Response response = OkHttpUtils.get(url,
-				OkHttpUtils.addHeaders(qqVc.cookie, "https://xui.ptlogin2.qq.com/", UA.PC));
+				OkHttpUtils.addHeaders(qqVc.cookie, "https://xui.ptlogin2.qq.com/", UA.CHROME_91));
 		String resultCookie = OkHttpUtils.getCookie(response);
 		String str = OkHttpUtils.getStr(response);
 		Result<String> result = QqUtils.getResultUrl(str);

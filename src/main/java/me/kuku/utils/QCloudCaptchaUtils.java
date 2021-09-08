@@ -31,7 +31,7 @@ public class QCloudCaptchaUtils {
 		Map<String, String> map = new HashMap<>();
 		map.put("script", base64Str);
 		map.put("width", String.valueOf(width));
-		JSONObject jsonObject = OkHttpUtils.postJson("https://api.kuku.me/tool/collectByWidth", map);
+		JSONObject jsonObject = OkHttpUtils.postJson("https://api.kukuqaq.com/tool/collectByWidth", map);
 		String collectData = URLDecoder.decode(jsonObject.getString("collectData"), "utf-8");
 		String eks = jsonObject.getString("eks");
 		String length = String.valueOf(collectData.length());

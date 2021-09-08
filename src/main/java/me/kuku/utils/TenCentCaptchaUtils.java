@@ -4,32 +4,35 @@ import com.alibaba.fastjson.JSONObject;
 import me.kuku.pojo.Result;
 import me.kuku.pojo.TencentCaptcha;
 import me.kuku.pojo.UA;
+import okhttp3.Headers;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
 public class TenCentCaptchaUtils {
 
-    private final static String en_ua = "TW96aWxsYS81LjAgKExpbnV4OyBBbmRyb2lkIDEwOyBWMTkxNEEgQnVpbGQvUVAxQS4xOTA3MTEuMDIwOyB3dikgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgVmVyc2lvbi80LjAgQ2hyb21lLzY2LjAuMzM1OS4xMjYgTVFRQnJvd3Nlci82LjIgVEJTLzA0NTEzMiBNb2JpbGUgU2FmYXJpLzUzNy4zNiBWMV9BTkRfU1FfOC4zLjBfMTM2Ml9ZWUJfRCBRUS84LjMuMC40NDgwIE5ldFR5cGUvNEcgV2ViUC8wLjMuMCBQaXhlbC8xMDgwIFN0YXR1c0JhckhlaWdodC84NSBTaW1wbGVVSVN3aXRjaC8wIFFRVGhlbWUvMTAwMA%3D%3D";
+    private final static String en_ua = Base64.getEncoder().encodeToString(UA.CHROME_91.getValue().getBytes(StandardCharsets.UTF_8));
 
-    private static String getCaptchaPictureUrl(Long appId, String imageId, String sess, String sid, int index){
-        return "https://t.captcha.qq.com/hycdn?index=" + index + "&image=" + imageId + "?aid=" + appId + "&sess=" + sess + "&sid=" + sid + "&img_index=" + index + "&subsid=5";
+    private static String getCaptchaPictureUrl(Long appId, String imageId, String sess, String sid, int index, int subSid){
+        return "https://t.captcha.qq.com/hycdn?index=" + index + "&image=" + imageId + "?aid=" + appId + "&sess=" + sess + "&sid=" + sid + "&img_index=" + index + "&subsid=" + subSid;
     }
 
     private static Map<String, String> getCollect(int width, String suffixUrl, String showUrl) throws IOException {
         String js = OkHttpUtils.getStr("https://t.captcha.qq.com/" + suffixUrl,
-                OkHttpUtils.addHeaders("", showUrl, UA.QQ));
+                OkHttpUtils.addHeaders("", showUrl, UA.CHROME_91));
         String base64Str = Base64.getEncoder().encodeToString(js.getBytes());
         Map<String, String> map = new HashMap<>();
         map.put("script", base64Str);
         map.put("width", String.valueOf(width));
-        JSONObject jsonObject = OkHttpUtils.postJson("https://apicf.kuku.me/tool/collectByWidth", map);
+        JSONObject jsonObject = OkHttpUtils.postJson("https://api.kukuqaq.com/tool/collectByWidth", map);
         String collectData = URLDecoder.decode(jsonObject.getString("collectData"), "utf-8");
         String eks = jsonObject.getString("eks");
         String length = String.valueOf(collectData.length());
@@ -40,47 +43,68 @@ public class TenCentCaptchaUtils {
         return result;
     }
 
-    private static int getWidth(String imageAUrl, String imageBUrl) throws IOException {
-        BufferedImage imageA = ImageIO.read(new URL(imageAUrl));
-        BufferedImage imageB = ImageIO.read(new URL(imageBUrl));
-        int imgWidth = imageA.getWidth();
-        int imgHeight = imageA.getHeight();
-        int t = 0, r = 0;
-        for (int i = 0; i < imgHeight - 20; i++){
-            for (int j = 0; j < imgWidth - 20; j++){
-                int rgbA = imageA.getRGB(j, i);
-                int rgbB = imageB.getRGB(j, i);
-                if (Math.abs(rgbA - rgbB) > 1800000){
-                    t++;
-                    r += j;
+    private static int getWidth(String imageAUrl, String imageBUrl, String imageCUrl, String showUrl) {
+        InputStream ais = null;
+        InputStream bis = null;
+        InputStream cis = null;
+        try {
+            Headers headers = OkHttpUtils.addHeaders("", showUrl, UA.CHROME_91);
+            ais = OkHttpUtils.getByteStream(imageAUrl, headers);
+            cis = OkHttpUtils.getByteStream(imageCUrl, headers);
+            bis = OkHttpUtils.getByteStream(imageBUrl, headers);
+            BufferedImage imageA = ImageIO.read(ais);
+            BufferedImage imageB = ImageIO.read(bis);
+            int imgWidth = imageA.getWidth();
+            int imgHeight = imageA.getHeight();
+            int t = 0, r = 0;
+            for (int i = 0; i < imgHeight - 20; i++){
+                for (int j = 0; j < imgWidth - 20; j++){
+                    int rgbA = imageA.getRGB(j, i);
+                    int rgbB = imageB.getRGB(j, i);
+                    if (Math.abs(rgbA - rgbB) > 1800000){
+                        t++;
+                        r += j;
+                    }
                 }
             }
+            return Math.round(Float.parseFloat(String.valueOf(r / t))) -55;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        } finally {
+            IOUtils.close(ais);
+            IOUtils.close(bis);
+            IOUtils.close(cis);
         }
-        return Math.round(Float.parseFloat(String.valueOf(r / t))) -55;
     }
 
     private static Map<String, String> getCaptcha(Long appId, String sid, String capCd, String qq, String refererUrl) throws IOException {
-        JSONObject jsonObject = OkHttpUtils.getJsonp("https://t.captcha.qq.com/cap_union_prehandle?aid=" + appId
-                        + "&protocol=https&accver=1&showtype=popup&ua=" + en_ua + "&noheader=0&fb=1&enableDarkMode=0&sid=" + sid
-                        + "&grayscale=1&clientype=1&cap_cd=" + capCd + "&uid=" + qq + "&wxLang=&lang=zh&entry_url=" + refererUrl + "&js=%2Ftcaptcha-frame.a75be429.js&subsid=3&callback=_aq_587&sess=",
-                OkHttpUtils.addHeaders("", "https://xui.ptlogin2.qq.com/", UA.QQ));
+        String preHandUrl = "https://t.captcha.qq.com/cap_union_prehandle?aid=" + appId + "&protocol=https&accver=1&showtype=embed&ua=" +
+                URLEncoder.encode(en_ua, "utf-8") + "&noheader=1&fb=1&enableDarkMode=0&sid=" + sid + "&grayscale=1&clientype=2&cap_cd=" +
+                capCd + "&uid=" + qq + "&wxLang=&lang=zh&entry_url=" +
+                URLEncoder.encode(refererUrl, "utf-8") + "&js=%2Ftcaptcha-frame.a75be429.js&subsid=3&callback=_aq_353052&sess=";
+        JSONObject jsonObject = OkHttpUtils.getJsonp(preHandUrl,
+                OkHttpUtils.addHeaders("", "https://ssl.captcha.qq.com/", UA.CHROME_91));
         String sess = jsonObject.getString("sess");
+        sid = jsonObject.getString("sid");
         String createIframeStart = String.valueOf(System.currentTimeMillis());
-        String showUrl = "https://t.captcha.qq.com/cap_union_new_show?aid=" + appId + "&protocol=https&accver=1&showtype=popup&ua=" + en_ua
-                + "&noheader=0&fb=1&enableDarkMode=0&sid=" + sid + "&grayscale=1&clientype=1&sess=" + sess
-                + "&fwidth=0&wxLang=&tcScale=1&uid=" + qq + "&cap_cd=" + capCd + "&rnd=" + MyUtils.randomNum(6) + "&prehandleLoadTime=41&createIframeStart=" + createIframeStart + "&subsid=4";
+        String rnd = MyUtils.randomNum(6);
+        String showUrl = "https://t.captcha.qq.com/cap_union_new_show?aid=" + appId + "&protocol=https&accver=1&showtype=embed&ua=" +
+                URLEncoder.encode(en_ua, "utf-8") + "&noheader=1&fb=1&enableDarkMode=0&sid=" + sid + "&grayscale=1&clientype=2&sess=" + sess
+                + "&fwidth=0&wxLang=&tcScale=1&uid=" + qq + "&cap_cd=" + capCd + "&rnd=" + rnd + "&prehandleLoadTime=23&createIframeStart=" + createIframeStart + "&subsid=2";
         String html = OkHttpUtils.getStr(showUrl,
-                OkHttpUtils.addHeaders("", "https://xui.ptlogin2.qq.com/", UA.QQ));
+                OkHttpUtils.addHeaders("", "https://xui.ptlogin2.qq.com/", UA.CHROME_91));
         String height = MyUtils.regex("spt:\"", "\"", html);
         sess = MyUtils.regex("sess:\"", "\"", html);
         String collectName = MyUtils.regex("collectdata:\"", "\"", html);
         String imageId = MyUtils.regex("image=", "\"", html);
         String suffixUrl = MyUtils.regex("\"tdc\",\"/", "\"", html);
-        String pow = MyUtils.regex("prefix:\"", "\"", html) + "808";
+        String pow = MyUtils.regex("prefix:\"", "\"", html);
         String nonce = MyUtils.regex("nonce:\"", "\"", html);
-        String imageAUrl = getCaptchaPictureUrl(appId, imageId, sess, sid, 1);
-        String imageBUrl = getCaptchaPictureUrl(appId, imageId, sess, sid, 0);
-        int width = getWidth(imageAUrl, imageBUrl);
+        String imageAUrl = getCaptchaPictureUrl(appId, imageId, sess, sid, 1, 3);
+        String imageBUrl = getCaptchaPictureUrl(appId, imageId, sess, sid, 0, 5);
+        String imageCUrl = getCaptchaPictureUrl(appId, imageId, sess, sid, 2, 4);
+        int width = getWidth(imageAUrl, imageBUrl, imageCUrl, showUrl);
         String ans = width + "," + height + ";";
         Map<String, String> collect = getCollect(width, suffixUrl, showUrl);
         Map<String, String> map = new HashMap<>();
@@ -96,6 +120,7 @@ public class TenCentCaptchaUtils {
         map.put("createIframeStart",createIframeStart);
         map.put("capCd", capCd);
         map.put("qq", qq);
+        map.put("rnd", rnd);
         map.putAll(collect);
         return map;
     }
@@ -105,40 +130,39 @@ public class TenCentCaptchaUtils {
         paramsMap.put("aid", String.valueOf(appId));
         paramsMap.put("protocol", "https");
         paramsMap.put("accver", "1");
-        paramsMap.put("showtype", "popup");
+        paramsMap.put("showtype", "embed");
+        paramsMap.put("noheader", "1");
         paramsMap.put("ua", en_ua);
-        paramsMap.put("noheader", "0");
         paramsMap.put("fb", "1");
         paramsMap.put("enableDarkMode", "0");
         paramsMap.put("sid", sid);
         paramsMap.put("grayscale", "1");
-        paramsMap.put("clientype", "1");
+        paramsMap.put("clientype", "2");
         paramsMap.put("sess", map.get("sess"));
         paramsMap.put("fwidth", "0");
-        paramsMap.put("wxLang", "0");
+        paramsMap.put("wxLang", "");
         paramsMap.put("tcScale", "1");
         paramsMap.put("uid", map.get("qq"));
         paramsMap.put("cap_cd", map.get("capCd"));
-        paramsMap.put("rnd", MyUtils.randomNum(6));
-        paramsMap.put("prehandleLoadTime", "25");
+        paramsMap.put("rnd", map.get("rnd"));
+        paramsMap.put("prehandleLoadTime", "23");
         paramsMap.put("createIframeStart", map.get("createIframeStart"));
-        paramsMap.put("subsid", "2");
+        paramsMap.put("subsid", "4");
         paramsMap.put("cdata", "0");
         paramsMap.put("ans", map.get("ans"));
         paramsMap.put("vsig", "");
         paramsMap.put("websig", "");
         paramsMap.put("subcapclass", "");
         paramsMap.put("pow_answer", map.get("pow"));
-        paramsMap.put("pow_calc_time", "17");
+        paramsMap.put("pow_calc_time", "25");
         paramsMap.put(map.get("collectName"), map.get("collectData"));
         paramsMap.put("tlg", map.get("length"));
         paramsMap.put("fpinfo", "");
         paramsMap.put("eks", map.get("eks"));
         paramsMap.put("nonce", map.get("nonce"));
         paramsMap.put("vlg", "0_0_1");
-        paramsMap.put("vData", "");
         JSONObject jsonObject = OkHttpUtils.postJson("https://t.captcha.qq.com/cap_union_new_verify", paramsMap,
-                OkHttpUtils.addHeaders("", map.get("showUrl"), UA.QQ));
+                OkHttpUtils.addHeaders("", map.get("showUrl"), UA.CHROME_91));
         if (jsonObject.getInteger("errorCode") == 0){
             TencentCaptcha tencentCaptcha = new TencentCaptcha(jsonObject.getString("ticket"), jsonObject.getString("randstr"));
             return Result.success(tencentCaptcha);
