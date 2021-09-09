@@ -6,9 +6,6 @@ import me.kuku.pojo.TencentCaptcha;
 import me.kuku.pojo.UA;
 import okhttp3.Response;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.io.IOException;
 import java.net.URLEncoder;
 

@@ -99,7 +99,7 @@ public class TenCentCaptchaUtils {
         String collectName = MyUtils.regex("collectdata:\"", "\"", html);
         String imageId = MyUtils.regex("image=", "\"", html);
         String suffixUrl = MyUtils.regex("\"tdc\",\"/", "\"", html);
-        String pow = MyUtils.regex("prefix:\"", "\"", html);
+        String pow = MyUtils.regex("prefix:\"", "\"", html) + "150";
         String nonce = MyUtils.regex("nonce:\"", "\"", html);
         String imageAUrl = getCaptchaPictureUrl(appId, imageId, sess, sid, 1, 3);
         String imageBUrl = getCaptchaPictureUrl(appId, imageId, sess, sid, 0, 5);
@@ -154,7 +154,7 @@ public class TenCentCaptchaUtils {
         paramsMap.put("websig", "");
         paramsMap.put("subcapclass", "");
         paramsMap.put("pow_answer", map.get("pow"));
-        paramsMap.put("pow_calc_time", "25");
+        paramsMap.put("pow_calc_time", "6");
         paramsMap.put(map.get("collectName"), map.get("collectData"));
         paramsMap.put("tlg", map.get("length"));
         paramsMap.put("fpinfo", "");
