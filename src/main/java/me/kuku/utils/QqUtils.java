@@ -134,7 +134,7 @@ public class QqUtils {
 		map.put("qq", qq.toString());
 		map.put("password", password);
 		map.put("randStr", vCode);
-		JSONObject jsonObject = OkHttpUtils.postJson("http://localhost:5460/tool/qq", map);
+		JSONObject jsonObject = OkHttpUtils.postJson("https://api.kukuqaq.com/tool/qq", map);
 		return jsonObject.getString("password");
 	}
 }
