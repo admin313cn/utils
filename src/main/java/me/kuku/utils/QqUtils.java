@@ -60,45 +60,40 @@ public class QqUtils {
 	}
 
 	public static Result<String> getResultUrl(String str){
-		String ss = MyUtils.regex("'", "','", str);
-		String msg = null;
-		if (ss == null) {
-			msg = MyUtils.regex(",'0','", "', ' '", str);
-			if (msg == null) msg = "其他错误";
-		}
-		if (msg == null) {
-			int num = Integer.parseInt(ss);
-			switch (num) {
-				case 4:
-					msg = "验证码错误，登录失败！！";
-					break;
-				case 3:
-					msg = "密码错误，登录失败！！";
-					break;
-				case 19:
-					msg = "您的QQ号已被冻结，登录失败！";
-					break;
-				case 10009:
-					return Result.failure(10009, "您的QQ号登录需要验证短信，请输入短信验证码！！");
-				case 0:
-				case 2: {
-					String url = MyUtils.regex(",'0','", "','", str);
-					if (url == null) url = MyUtils.regex("','", "'", str);
-					if (url != null) return Result.success(url);
-					else msg = "";
-					break;
-				}
-				case 1:
-				case -1:
-				case 7:
-					msg = "superKey已失效，请更新QQ！";
-					break;
-				case 23003:
-					msg = "当前上网环境异常，请更换网络环境或在常用设备上登录或稍后再试。请尝试扫码登录。";
-					break;
-				default:
-					msg = str;
+		String sss = str.substring(str.indexOf("('") + 2, str.lastIndexOf('\'')).replace("', '", "");
+		String[] arr = sss.split("','");
+		String ss = arr[0];
+		String msg;
+		int num = Integer.parseInt(ss);
+		switch (num) {
+			case 4:
+				msg = "验证码错误，登录失败！！";
+				break;
+			case 3:
+				msg = "密码错误，登录失败！！";
+				break;
+			case 19:
+				msg = "您的QQ号已被冻结，登录失败！";
+				break;
+			case 10009:
+				return Result.failure(10009, "您的QQ号登录需要验证短信，请输入短信验证码！！");
+			case 0:
+			case 2: {
+				String url = arr[2];
+				if (url != null) return Result.success(url);
+				else msg = "";
+				break;
 			}
+			case 1:
+			case -1:
+			case 7:
+				msg = "superKey已失效，请更新QQ！";
+				break;
+			case 23003:
+				msg = "当前上网环境异常，请更换网络环境或在常用设备上登录或稍后再试。请尝试扫码登录。";
+				break;
+			default:
+				msg = str;
 		}
 		if (msg.contains("superKey")) return Result.failure(502, msg);
 		return Result.failure(500, msg);

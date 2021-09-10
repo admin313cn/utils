@@ -21,6 +21,7 @@ public class QqPasswordConnectLoginUtils {
 		private String ptdRvs;
 		private String redirectUrl;
 		private String xuiUrl;
+		private String time;
 
 		private Boolean needCaptcha;
 		private Integer code;
@@ -52,6 +53,7 @@ public class QqPasswordConnectLoginUtils {
 		String appId = MyUtils.regex("appid=", "&", xuiUrl);
 		String daId = MyUtils.regex("daid=", "&", xuiUrl);
 		String h5sig = MyUtils.regex("h5sig=", "&", xuiUrl);
+		String time = MyUtils.regex("time=", "&", xuiUrl);
 		Response checkResponse = OkHttpUtils.get("https://xui.ptlogin2.qq.com/ssl/check?pt_tea=2&uin=" + qq + "&appid=" + appId
 				+ "&ptlang=2052&regmaster=&pt_uistyle=35&r=0." + MyUtils.randomNum(16),
 				OkHttpUtils.addHeaders(xuiCookie, xuiUrl, UA.QQ));
@@ -64,6 +66,7 @@ public class QqPasswordConnectLoginUtils {
 		int code = Integer.parseInt(arr[0]);
 		boolean needCaptcha = code == 1;
 		QqVc qqVc = new QqVc(Long.parseLong(appId), Integer.parseInt(daId), ptAid, h5sig, cookie, ptdRvs, redirectUrl, xuiUrl);
+		qqVc.time = time;
 		qqVc.setCode(code);
 		qqVc.setNeedCaptcha(needCaptcha);
 		qqVc.setSid(arr[6]);
@@ -81,7 +84,7 @@ public class QqPasswordConnectLoginUtils {
 		String uri = "https://xui.ptlogin2.qq.com/ssl/pt_open_login?openlogin_data=which%3D%26refer_cgi%3Dauthorize%26response_type%3Dcode%26client_id%3D" +
 				qqVc.ptAid + "%26state%3D%26display%3D%26openapi%3D1010_1011%26switch%3D0%26src%3D1%26sdkv%3Dv1.0%26sdkp%3Dpcweb%26tid%3D" +
 				idt + "%26pf%3D%26need_pay%3D0%26browser%3D0%26browser_error%3D%26serial%3D%26token_key%3D%26redirect_uri%3D" +
-				redirectUrl + "%26sign%3D%26time%3D" + System.currentTimeMillis() / 1000 + "%26status_version%3D%26status_os%3D%26status_machine%3D%26page_type%3D1%26has_auth%3D1%26update_auth%3D1%26auth_time%3D" +
+				redirectUrl + "%26sign%3D%26time%3D" + qqVc.time + "%26status_version%3D%26status_os%3D%26status_machine%3D%26page_type%3D1%26has_auth%3D1%26update_auth%3D1%26auth_time%3D" +
 				System.currentTimeMillis() + "%26loginfrom%3D%26h5sig%3D" + qqVc.h5sig + "%26loginty%3D3%26&ptdrvs=" + qqVc.ptdRvs +
 				"&pt_vcode_v1=" + qqVc.code + "&pt_verifysession_v1=" + qqVc.ticket + "&verifycode=" + qqVc.randomStr +
 				"&u=" + qq + "&p=" + encryptPassword + "&pt_randsalt=2&ptlang=2052&low_login_enable=0&u1=https%3A%2F%2Fconnect.qq.com&from_ui=1&fp=loginerroralert&device=2&aid=" +
