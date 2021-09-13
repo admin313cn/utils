@@ -31,7 +31,7 @@ public class TenCentCaptchaUtils {
         String base64Str = Base64.getEncoder().encodeToString(js.getBytes());
         Map<String, String> map = new HashMap<>();
         map.put("script", base64Str);
-        JSONObject jsonObject = OkHttpUtils.postJson("https://api.kukuqaq.com/tool/collect", map);
+        JSONObject jsonObject = OkHttpUtils.postJson("https://api.kukuqaq.com/exec/collect", map);
         String collectData = URLDecoder.decode(jsonObject.getString("collectData"), "utf-8");
         String eks = jsonObject.getString("eks");
         String length = String.valueOf(collectData.length());
