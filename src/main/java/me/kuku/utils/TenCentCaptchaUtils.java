@@ -25,14 +25,13 @@ public class TenCentCaptchaUtils {
         return "https://t.captcha.qq.com/hycdn?index=" + index + "&image=" + imageId + "?aid=" + appId + "&sess=" + sess + "&sid=" + sid + "&img_index=" + index + "&subsid=" + subSid;
     }
 
-    private static Map<String, String> getCollect(int width, String suffixUrl, String showUrl) throws IOException {
+    private static Map<String, String> getCollect(String rnd, String suffixUrl, String showUrl) throws IOException {
         String js = OkHttpUtils.getStr("https://t.captcha.qq.com/" + suffixUrl,
                 OkHttpUtils.addHeaders("", showUrl, UA.CHROME_91));
         String base64Str = Base64.getEncoder().encodeToString(js.getBytes());
         Map<String, String> map = new HashMap<>();
         map.put("script", base64Str);
-        map.put("width", String.valueOf(width));
-        JSONObject jsonObject = OkHttpUtils.postJson("https://api.kukuqaq.com/tool/collectByWidth", map);
+        JSONObject jsonObject = OkHttpUtils.postJson("https://api.kukuqaq.com/tool/collect", map);
         String collectData = URLDecoder.decode(jsonObject.getString("collectData"), "utf-8");
         String eks = jsonObject.getString("eks");
         String length = String.valueOf(collectData.length());
@@ -106,7 +105,7 @@ public class TenCentCaptchaUtils {
         String imageCUrl = getCaptchaPictureUrl(appId, imageId, sess, sid, 2, 4);
         int width = getWidth(imageAUrl, imageBUrl, imageCUrl, showUrl);
         String ans = width + "," + height + ";";
-        Map<String, String> collect = getCollect(width, suffixUrl, showUrl);
+        Map<String, String> collect = getCollect(rnd, suffixUrl, showUrl);
         Map<String, String> map = new HashMap<>();
         map.put("sess", sess);
         map.put("sid", sid);
