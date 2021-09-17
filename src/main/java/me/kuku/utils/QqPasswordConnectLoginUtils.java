@@ -41,9 +41,9 @@ public class QqPasswordConnectLoginUtils {
 		}
 	}
 
-	private static QqVc checkVc(Long qq, Long ptAid, String redirectUrl) throws IOException {
+	private static QqVc checkVc(Long qq, Long ptAid, String redirectUrl, String state) throws IOException {
 		String graphStr = OkHttpUtils.getStr("https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=" + ptAid +
-						"&redirect_uri=" + URLEncoder.encode(redirectUrl, "utf-8") + "&scope=get_user_info",
+						"&redirect_uri=" + URLEncoder.encode(redirectUrl, "utf-8") + "&scope=get_user_info&state=" + state,
 				OkHttpUtils.addUA(UA.QQ));
 		String enUrl = MyUtils.regex("content=\"1;url=", "\"", graphStr);
 		String xuiUrl = enUrl.replaceAll("&#61;", "=").replaceAll("&amp;", "&");
@@ -77,12 +77,12 @@ public class QqPasswordConnectLoginUtils {
 		return qqVc;
 	}
 
-	private static Result<String> login(long qq, String password, QqVc qqVc) throws IOException {
+	private static Result<String> login(long qq, String password, QqVc qqVc, String state) throws IOException {
 		long idt = System.currentTimeMillis() / 1000 - 5;
 		String encryptPassword = QqUtils.encryptPassword(qq, password, qqVc.randomStr);
 		String redirectUrl = URLEncoder.encode(URLEncoder.encode(qqVc.redirectUrl, "utf-8"), "utf-8");
 		String uri = "https://xui.ptlogin2.qq.com/ssl/pt_open_login?openlogin_data=which%3D%26refer_cgi%3Dauthorize%26response_type%3Dcode%26client_id%3D" +
-				qqVc.ptAid + "%26state%3D%26display%3D%26openapi%3D1010_1011%26switch%3D0%26src%3D1%26sdkv%3Dv1.0%26sdkp%3Dpcweb%26tid%3D" +
+				qqVc.ptAid + "%26state%3D" + state + "%26display%3D%26openapi%3D1010_1011%26switch%3D0%26src%3D1%26sdkv%3Dv1.0%26sdkp%3Dpcweb%26tid%3D" +
 				idt + "%26pf%3D%26need_pay%3D0%26browser%3D0%26browser_error%3D%26serial%3D%26token_key%3D%26redirect_uri%3D" +
 				redirectUrl + "%26sign%3D%26time%3D" + qqVc.time + "%26status_version%3D%26status_os%3D%26status_machine%3D%26page_type%3D1%26has_auth%3D1%26update_auth%3D1%26auth_time%3D" +
 				System.currentTimeMillis() + "%26loginfrom%3D%26h5sig%3D" + qqVc.h5sig + "%26loginty%3D3%26&ptdrvs=" + qqVc.ptdRvs +
@@ -101,7 +101,11 @@ public class QqPasswordConnectLoginUtils {
 	}
 
 	public static Result<String> login(Long qq, String password, Long ptAid, String url) throws IOException {
-		QqVc qqVc = checkVc(qq, ptAid, url);
+		return login(qq, password, ptAid, url, "");
+	}
+
+	public static Result<String> login(Long qq, String password, Long ptAid, String url, String state) throws IOException {
+		QqVc qqVc = checkVc(qq, ptAid, url, state);
 		if (qqVc.needCaptcha){
 			Result<TencentCaptcha> result = TenCentCaptchaUtils.identify(qqVc.appId, qqVc.sid, qqVc.xuiUrl);
 			if (result.getCode() == 200) {
@@ -111,7 +115,7 @@ public class QqPasswordConnectLoginUtils {
 			}
 			else return Result.failure(result.getMessage());
 		}
-		return login(qq, password, qqVc);
+		return login(qq, password, qqVc, state);
 	}
 
 

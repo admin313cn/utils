@@ -93,7 +93,7 @@ public class QqUtils {
 				msg = "当前上网环境异常，请更换网络环境或在常用设备上登录或稍后再试。请尝试扫码登录。";
 				break;
 			default:
-				msg = str;
+				msg = arr[4];
 		}
 		if (msg.contains("superKey")) return Result.failure(502, msg);
 		return Result.failure(500, msg);

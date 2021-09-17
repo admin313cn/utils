@@ -44,7 +44,7 @@ public class QqPasswordLoginUtils {
 		String enRedirectUrl = URLEncoder.encode(redirectUrl, "utf-8");
 		String xuiUrl = "https://xui.ptlogin2.qq.com/cgi-bin/xlogin?appid=" +
 				qqApp.getAppId() + "&style=20&s_url=" + enRedirectUrl + "&maskOpacity=60&daid=" + qqApp.getDaId() + "&target=self";
-		Response xuiResponse = OkHttpUtils.get(xuiUrl, OkHttpUtils.addHeaders("", "https://vip.qq.com/", UA.CHROME_91));
+		Response xuiResponse = OkHttpUtils.get(xuiUrl, OkHttpUtils.addHeaders("", "https://xui.ptlogin2.qq.com/", UA.CHROME_91));
 		xuiResponse.close();
 		String xuiCookie = OkHttpUtils.getCookie(xuiResponse) + "ptui_loginuin=" + qq + ";";
 		String loginSig = OkHttpUtils.getCookie(xuiCookie, "pt_login_sig");
