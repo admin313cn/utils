@@ -1,5 +1,12 @@
 package me.kuku.utils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import me.kuku.pojo.HiToKoTo;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -90,5 +97,14 @@ public class MyUtils {
 		}
 		if (result == 0) return result + suffix;
 		return df.format(result) + suffix;
+	}
+
+	public static byte[] creatQr(String content) throws IOException {
+		return OkHttpUtils.getBytes("https://www.zhihu.com/qrcode?url=" + URLEncoder.encode(content, "utf-8"));
+	}
+
+	public static HiToKoTo hiToKoTo() throws IOException {
+		JSONObject jsonObject = OkHttpUtils.getJson("https://v1.hitokoto.cn/");
+		return JSON.parseObject(jsonObject.toString(), HiToKoTo.class);
 	}
 }

@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class QqLoginQrcode {
-	private byte[] bytes;
+	private String imageBase;
 	private String sig;
 }

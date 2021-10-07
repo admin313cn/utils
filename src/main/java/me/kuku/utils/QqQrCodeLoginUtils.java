@@ -5,6 +5,8 @@ import okhttp3.Response;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -17,7 +19,7 @@ public class QqQrCodeLoginUtils {
 		byte[] bytes = OkHttpUtils.getBytes(response);
 		String cookie = OkHttpUtils.getCookie(response);
 		String sig = OkHttpUtils.getCookie(cookie, "qrsig");
-		return new QqLoginQrcode(bytes, sig);
+		return new QqLoginQrcode(Base64.getEncoder().encodeToString(bytes), sig);
 	}
 
 	public static QqLoginQrcode getQrcode(QqApp qqApp) throws IOException {
