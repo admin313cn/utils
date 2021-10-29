@@ -37,7 +37,7 @@ public class OkHttpUtils {
     }
 
     private static Headers emptyHeaders(){
-        return addSingleHeader("user-agent", UA.PC.getValue());
+        return addSingleHeader("User-Agent", UA.PC.getValue());
     }
 
     public static Response get(String url, Headers headers) throws IOException {
@@ -387,7 +387,7 @@ public class OkHttpUtils {
         if (cookie == null) cookie = "";
         if (referer == null) referer = "";
         if (userAgent == null) userAgent = UA.PC.getValue();
-        return new Headers.Builder().add("cookie", cookie).add("referer", referer).add("user-agent", userAgent).build();
+        return new Headers.Builder().add("Cookie", cookie).add("Referer", referer).add("User-Agent", userAgent).build();
     }
 
     public static Headers addHeaders(String cookie, String referer, UA ua){
@@ -411,19 +411,19 @@ public class OkHttpUtils {
     }
 
     public static Headers addUA(UA ua){
-        return addSingleHeader("user-agent", ua.getValue());
+        return addSingleHeader("User-Agent", ua.getValue());
     }
 
     public static Headers addUA(String ua){
-        return addSingleHeader("user-agent", ua);
+        return addSingleHeader("User-Agent", ua);
     }
 
     public static Headers addCookie(String cookie){
-        return addSingleHeader("cookie", cookie);
+        return addSingleHeader("Cookie", cookie);
     }
 
     public static Headers addReferer(String url){
-        return addSingleHeader("referer", url);
+        return addSingleHeader("Referer", url);
     }
 
     public static RequestBody addStream(ByteString byteString){

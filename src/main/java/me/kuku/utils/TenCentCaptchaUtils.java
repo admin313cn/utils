@@ -15,30 +15,36 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class TenCentCaptchaUtils {
 
-    private final static String en_ua = Base64.getEncoder().encodeToString(UA.CHROME_91.getValue().getBytes(StandardCharsets.UTF_8));
+    private final static String en_ua = Base64.getEncoder().encodeToString(UA.PC.getValue().getBytes(StandardCharsets.UTF_8));
 
     private static String getCaptchaPictureUrl(Long appId, String imageId, String sess, String sid, int index, int subSid){
         return "https://t.captcha.qq.com/hycdn?index=" + index + "&image=" + imageId + "?aid=" + appId + "&sess=" + sess + "&sid=" + sid + "&img_index=" + index + "&subsid=" + subSid;
     }
 
-    private static Map<String, String> getCollect(String rnd, String suffixUrl, String showUrl) throws IOException {
+    private static Map<String, String> getCollect(String suffixUrl, String showUrl, String sess, String sid) throws IOException {
         String js = OkHttpUtils.getStr("https://t.captcha.qq.com/" + suffixUrl,
-                OkHttpUtils.addHeaders("", showUrl, UA.CHROME_91));
+                OkHttpUtils.addHeaders("", showUrl, UA.PC));
         String base64Str = Base64.getEncoder().encodeToString(js.getBytes());
         Map<String, String> map = new HashMap<>();
         map.put("script", base64Str);
-        JSONObject jsonObject = OkHttpUtils.postJson("https://api.kukuqaq.com/exec/collect", map);
-        String collectData = URLDecoder.decode(jsonObject.getString("collectData"), "utf-8");
+        map.put("sess", sess);
+        map.put("sid", sid);
+//        JSONObject jsonObject = OkHttpUtils.postJson("https://api.kukuqaq.com/exec/collectAndVData", map);
+        JSONObject jsonObject = OkHttpUtils.postJson("http://localhost:5460/exec/collectAndVData", map);
+        String tempCollectData = jsonObject.getString("collectData");
+        String collectData = new String(Base64.getDecoder().decode(tempCollectData), StandardCharsets.UTF_8);
         String eks = jsonObject.getString("eks");
-        String length = String.valueOf(collectData.length());
         Map<String, String> result = new HashMap<>();
         result.put("collectData", collectData);
         result.put("eks", eks);
-        result.put("length", length);
+        result.put("cookie", jsonObject.getString("cookie"));
+        result.put("length", jsonObject.getString("tlg"));
+        result.put("vData", jsonObject.getString("vData"));
         return result;
     }
 
@@ -47,7 +53,7 @@ public class TenCentCaptchaUtils {
         InputStream bis = null;
         InputStream cis = null;
         try {
-            Headers headers = OkHttpUtils.addHeaders("", showUrl, UA.CHROME_91);
+            Headers headers = OkHttpUtils.addHeaders("", showUrl, UA.PC);
             ais = OkHttpUtils.getByteStream(imageAUrl, headers);
             cis = OkHttpUtils.getByteStream(imageCUrl, headers);
             bis = OkHttpUtils.getByteStream(imageBUrl, headers);
@@ -79,20 +85,20 @@ public class TenCentCaptchaUtils {
 
     private static Map<String, String> getCaptcha(Long appId, String sid, String capCd, String qq, String refererUrl) throws IOException {
         String preHandUrl = "https://t.captcha.qq.com/cap_union_prehandle?aid=" + appId + "&protocol=https&accver=1&showtype=embed&ua=" +
-                URLEncoder.encode(en_ua, "utf-8") + "&noheader=1&fb=1&enableDarkMode=0&sid=" + sid + "&grayscale=1&clientype=2&cap_cd=" +
-                capCd + "&uid=" + qq + "&wxLang=&lang=zh&entry_url=" +
-                URLEncoder.encode(refererUrl, "utf-8") + "&js=%2Ftcaptcha-frame.a75be429.js&subsid=3&callback=_aq_353052&sess=";
+                URLEncoder.encode(en_ua, "utf-8") + "&noheader=1&fb=1&aged=0&enableAged=0&enableDarkMode=0&sid=" + sid + "&grayscale=1&clientype=2&cap_cd=" +
+                capCd + "&uid=" + qq + "&wxLang=&lang=zh-CN&entry_url=" +
+                URLEncoder.encode(refererUrl, "utf-8") + "&js=%2Ftcaptcha-frame.85d7a77d.js&subsid=1&callback=_aq_353052&sess=";
         JSONObject jsonObject = OkHttpUtils.getJsonp(preHandUrl,
-                OkHttpUtils.addHeaders("", "https://ssl.captcha.qq.com/", UA.CHROME_91));
+                OkHttpUtils.addHeaders("", "https://xui.ptlogin2.qq.com/", UA.PC));
         String sess = jsonObject.getString("sess");
         sid = jsonObject.getString("sid");
         String createIframeStart = String.valueOf(System.currentTimeMillis());
         String rnd = MyUtils.randomNum(6);
         String showUrl = "https://t.captcha.qq.com/cap_union_new_show?aid=" + appId + "&protocol=https&accver=1&showtype=embed&ua=" +
-                URLEncoder.encode(en_ua, "utf-8") + "&noheader=1&fb=1&enableDarkMode=0&sid=" + sid + "&grayscale=1&clientype=2&sess=" + sess
+                URLEncoder.encode(en_ua, "utf-8") + "&noheader=1&fb=1&aged=0&enableAged=0&enableDarkMode=0&sid=" + sid + "&grayscale=1&clientype=2&sess=" + sess
                 + "&fwidth=0&wxLang=&tcScale=1&uid=" + qq + "&cap_cd=" + capCd + "&rnd=" + rnd + "&prehandleLoadTime=23&createIframeStart=" + createIframeStart + "&subsid=2";
         String html = OkHttpUtils.getStr(showUrl,
-                OkHttpUtils.addHeaders("", "https://xui.ptlogin2.qq.com/", UA.CHROME_91));
+                OkHttpUtils.addHeaders("", "https://xui.ptlogin2.qq.com/", UA.PC));
         String height = MyUtils.regex("spt:\"", "\"", html);
         sess = MyUtils.regex("sess:\"", "\"", html);
         String collectName = MyUtils.regex("collectdata:\"", "\"", html);
@@ -105,7 +111,7 @@ public class TenCentCaptchaUtils {
         String imageCUrl = getCaptchaPictureUrl(appId, imageId, sess, sid, 2, 4);
         int width = getWidth(imageAUrl, imageBUrl, imageCUrl, showUrl);
         String ans = width + "," + height + ";";
-        Map<String, String> collect = getCollect(rnd, suffixUrl, showUrl);
+        Map<String, String> collect = getCollect(suffixUrl, showUrl, sess, sid);
         Map<String, String> map = new HashMap<>();
         map.put("sess", sess);
         map.put("sid", sid);
@@ -125,14 +131,16 @@ public class TenCentCaptchaUtils {
     }
 
     private static Result<TencentCaptcha> identifyCaptcha(Long appId, String sid, Map<String, String> map) throws IOException {
-        Map<String, String> paramsMap = new HashMap<>();
+        Map<String, String> paramsMap = new LinkedHashMap<>();
         paramsMap.put("aid", String.valueOf(appId));
         paramsMap.put("protocol", "https");
         paramsMap.put("accver", "1");
         paramsMap.put("showtype", "embed");
-        paramsMap.put("noheader", "1");
         paramsMap.put("ua", en_ua);
+        paramsMap.put("noheader", "1");
         paramsMap.put("fb", "1");
+        paramsMap.put("aged", "0");
+        paramsMap.put("enableAged", "0");
         paramsMap.put("enableDarkMode", "0");
         paramsMap.put("sid", sid);
         paramsMap.put("grayscale", "1");
@@ -146,7 +154,7 @@ public class TenCentCaptchaUtils {
         paramsMap.put("rnd", map.get("rnd"));
         paramsMap.put("prehandleLoadTime", "23");
         paramsMap.put("createIframeStart", map.get("createIframeStart"));
-        paramsMap.put("subsid", "4");
+        paramsMap.put("subsid", "2");
         paramsMap.put("cdata", "0");
         paramsMap.put("ans", map.get("ans"));
         paramsMap.put("vsig", "");
@@ -160,8 +168,9 @@ public class TenCentCaptchaUtils {
         paramsMap.put("eks", map.get("eks"));
         paramsMap.put("nonce", map.get("nonce"));
         paramsMap.put("vlg", "0_0_1");
+        paramsMap.put("vData", map.get("vData"));
         JSONObject jsonObject = OkHttpUtils.postJson("https://t.captcha.qq.com/cap_union_new_verify", paramsMap,
-                OkHttpUtils.addHeaders("", map.get("showUrl"), UA.CHROME_91));
+                OkHttpUtils.addHeaders(map.get("cookie"), map.get("showUrl"), UA.PC));
         if (jsonObject.getInteger("errorCode") == 0){
             TencentCaptcha tencentCaptcha = new TencentCaptcha(jsonObject.getString("ticket"), jsonObject.getString("randstr"));
             return Result.success(tencentCaptcha);

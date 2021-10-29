@@ -49,7 +49,7 @@ public class QqPasswordLoginUtils {
 		String xuiCookie = OkHttpUtils.getCookie(xuiResponse) + "ptui_loginuin=" + qq + ";";
 		String loginSig = OkHttpUtils.getCookie(xuiCookie, "pt_login_sig");
 		Response checkResponse = OkHttpUtils.get("https://ssl.ptlogin2.qq.com/check?regmaster=&pt_tea=2&pt_vcode=1&uin=" + qq + "&appid=" +
-				qqApp.getAppId() + "&js_ver=21082415&js_type=1&login_sig=" + loginSig + "&u1=" + enRedirectUrl + "&r=0." +
+				qqApp.getAppId() + "&js_ver=21100910&js_type=1&login_sig=" + loginSig + "&u1=" + enRedirectUrl + "&r=0." +
 				MyUtils.randomNum(15) + "&pt_uistyle=40", OkHttpUtils.addHeaders(xuiCookie, "https://xui.ptlogin2.qq.com/",
 				UA.CHROME_91));
 		String checkCookie = OkHttpUtils.getCookie(checkResponse);
