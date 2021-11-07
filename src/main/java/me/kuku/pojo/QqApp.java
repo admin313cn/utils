@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class QqApp {
 	private Long appId;
 	private Integer daId;
-	private Long ptAid;
+	private Long ptAid = 0L;
 
 	public QqApp(Long appId, Integer daId){
 		this.appId = appId;

@@ -3,10 +3,12 @@ package me.kuku.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import me.kuku.pojo.HiToKoTo;
+import me.kuku.pojo.UA;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -107,4 +109,26 @@ public class MyUtils {
 		JSONObject jsonObject = OkHttpUtils.getJson("https://v1.hitokoto.cn/");
 		return JSON.parseObject(jsonObject.toString(), HiToKoTo.class);
 	}
+
+	public static String pasteUbuntu(String poster, String syntax, String content) {
+		Map<String, String> map = new HashMap<>();
+		map.put("poster", poster);
+		map.put("syntax", syntax);
+		map.put("content", content);
+		try {
+			JSONObject jsonObject = OkHttpUtils.postJson("https://api.kukuqaq.com/tool/paste", map, OkHttpUtils.addUA(UA.PC));
+			return jsonObject.getJSONObject("data").getString("data");
+		} catch (IOException e) {
+			return "生成失败！！";
+		}
+	}
+
+	public static String exPasteUbuntu(Exception e) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw);
+		return pasteUbuntu("exception", "java", sw.toString());
+	}
+
+
 }

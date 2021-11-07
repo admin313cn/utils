@@ -79,7 +79,10 @@ public class QqUtils {
 				return Result.failure(10009, "您的QQ号登录需要验证短信，请输入短信验证码！！");
 			case 0:
 			case 2: {
-				String url = arr[2];
+				String url;
+				if (arr.length == 2)
+					url = arr[1];
+				else url = arr[2];
 				if (url != null) return Result.success(url);
 				else msg = "";
 				break;
