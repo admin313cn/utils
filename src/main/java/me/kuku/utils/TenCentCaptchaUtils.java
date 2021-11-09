@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class TenCentCaptchaUtils {
 
-    private final static String en_ua = Base64.getEncoder().encodeToString(UA.PC.getValue().getBytes(StandardCharsets.UTF_8));
+    private final static String ua = "TW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzk1LjAuNDYzOC42OSBTYWZhcmkvNTM3LjM2";
 
     private static String getCaptchaPictureUrl(Long appId, String imageId, String sess, String sid, int index, int subSid){
         return "https://t.captcha.qq.com/hycdn?index=" + index + "&image=" + imageId + "?aid=" + appId + "&sess=" + sess + "&sid=" + sid + "&img_index=" + index + "&subsid=" + subSid;
@@ -35,8 +35,8 @@ public class TenCentCaptchaUtils {
         map.put("sid", sid);
         String jsTime = MyUtils.regex("(?<=\\?t\\=).*", suffixUrl);
         map.put("jsTime", jsTime);
-        JSONObject jsonObject = OkHttpUtils.postJson("https://api.kukuqaq.com/exec/collectAndVData", map);
-//        JSONObject jsonObject = OkHttpUtils.postJson("http://localhost:5460/exec/collectAndVData", map);
+//        JSONObject jsonObject = OkHttpUtils.postJson("https://api.kukuqaq.com/exec/collectAndVData", map);
+        JSONObject jsonObject = OkHttpUtils.postJson("http://localhost:5460/exec/collectAndVData", map);
         String tempCollectData = jsonObject.getString("collectData");
         String collectData = new String(Base64.getDecoder().decode(tempCollectData), StandardCharsets.UTF_8);
         String eks = jsonObject.getString("eks");
@@ -86,7 +86,7 @@ public class TenCentCaptchaUtils {
 
     private static Map<String, String> getCaptcha(Long appId, String sid, String capCd, String qq, String refererUrl) throws IOException {
         String preHandUrl = "https://t.captcha.qq.com/cap_union_prehandle?aid=" + appId + "&protocol=https&accver=1&showtype=embed&ua=" +
-                URLEncoder.encode(en_ua, "utf-8") + "&noheader=1&fb=1&aged=0&enableAged=0&enableDarkMode=0&sid=" + sid + "&grayscale=1&clientype=2&cap_cd=" +
+                ua + "&noheader=1&fb=1&aged=0&enableAged=0&enableDarkMode=0&sid=" + sid + "&grayscale=1&clientype=2&cap_cd=" +
                 capCd + "&uid=" + qq + "&wxLang=&lang=zh-CN&entry_url=" +
                 URLEncoder.encode(refererUrl, "utf-8") + "&js=%2Ftcaptcha-frame.85d7a77d.js&subsid=1&callback=_aq_353052&sess=";
         JSONObject jsonObject = OkHttpUtils.getJsonp(preHandUrl,
@@ -96,7 +96,7 @@ public class TenCentCaptchaUtils {
         String createIframeStart = String.valueOf(System.currentTimeMillis());
         String rnd = MyUtils.randomNum(6);
         String showUrl = "https://t.captcha.qq.com/cap_union_new_show?aid=" + appId + "&protocol=https&accver=1&showtype=embed&ua=" +
-                URLEncoder.encode(en_ua, "utf-8") + "&noheader=1&fb=1&aged=0&enableAged=0&enableDarkMode=0&sid=" + sid + "&grayscale=1&clientype=2&sess=" + sess
+                ua + "&noheader=1&fb=1&aged=0&enableAged=0&enableDarkMode=0&sid=" + sid + "&grayscale=1&clientype=2&sess=" + sess
                 + "&fwidth=0&wxLang=&tcScale=1&uid=" + qq + "&cap_cd=" + capCd + "&rnd=" + rnd + "&prehandleLoadTime=23&createIframeStart=" + createIframeStart + "&subsid=2";
         String html = OkHttpUtils.getStr(showUrl,
                 OkHttpUtils.addHeaders("", "https://xui.ptlogin2.qq.com/", UA.PC));
@@ -105,7 +105,7 @@ public class TenCentCaptchaUtils {
         String collectName = MyUtils.regex("collectdata:\"", "\"", html);
         String imageId = MyUtils.regex("image=", "\"", html);
         String suffixUrl = MyUtils.regex("\"tdc\",\"/", "\"", html);
-        String pow = MyUtils.regex("prefix:\"", "\"", html) + "150";
+        String pow = MyUtils.regex("prefix:\"", "\"", html);
         String nonce = MyUtils.regex("nonce:\"", "\"", html);
         String imageAUrl = getCaptchaPictureUrl(appId, imageId, sess, sid, 1, 3);
         String imageBUrl = getCaptchaPictureUrl(appId, imageId, sess, sid, 0, 5);
@@ -137,7 +137,7 @@ public class TenCentCaptchaUtils {
         paramsMap.put("protocol", "https");
         paramsMap.put("accver", "1");
         paramsMap.put("showtype", "embed");
-        paramsMap.put("ua", en_ua);
+        paramsMap.put("ua", ua);
         paramsMap.put("noheader", "1");
         paramsMap.put("fb", "1");
         paramsMap.put("aged", "0");
