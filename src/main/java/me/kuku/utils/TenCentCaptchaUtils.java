@@ -35,8 +35,8 @@ public class TenCentCaptchaUtils {
         map.put("sid", sid);
         String jsTime = MyUtils.regex("(?<=\\?t\\=).*", suffixUrl);
         map.put("jsTime", jsTime);
-//        JSONObject jsonObject = OkHttpUtils.postJson("https://api.kukuqaq.com/exec/collectAndVData", map);
-        JSONObject jsonObject = OkHttpUtils.postJson("http://localhost:5460/exec/collectAndVData", map);
+        JSONObject jsonObject = OkHttpUtils.postJson("https://api.kukuqaq.com/exec/collectAndVData", map);
+//        JSONObject jsonObject = OkHttpUtils.postJson("http://localhost:5460/exec/collectAndVData", map);
         String tempCollectData = jsonObject.getString("collectData");
         String collectData = new String(Base64.getDecoder().decode(tempCollectData), StandardCharsets.UTF_8);
         String eks = jsonObject.getString("eks");
