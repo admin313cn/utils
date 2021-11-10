@@ -188,4 +188,8 @@ public class TenCentCaptchaUtils {
         return identifyCaptcha(appId, sid, map);
     }
 
+    public static Result<?> identify(Long appId, String referer) throws IOException {
+        return identify(appId, "", referer);
+    }
+
 }
