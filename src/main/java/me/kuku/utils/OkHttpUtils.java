@@ -6,6 +6,7 @@ import me.kuku.pojo.UA;
 import okhttp3.*;
 import okio.ByteString;
 
+import javax.net.ssl.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,12 +29,40 @@ public class OkHttpUtils {
     private static final OkHttpClient okHttpClient;
 
     static {
-        okHttpClient = new OkHttpClient.Builder()
-                .followRedirects(false)
+        final SSLContext sslContext;
+        TrustManager[] trustAllCerts = null;
+        javax.net.ssl.SSLSocketFactory sslSocketFactory = null;
+        try {
+            trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                        }
+
+                        @Override
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new java.security.cert.X509Certificate[]{};
+                        }
+                    }
+            };
+            sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            sslSocketFactory = sslContext.getSocketFactory();
+        } catch (Exception ignore) {
+        }
+        OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                .followRedirects(false);
+        if (sslSocketFactory != null) {
+            builder = builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) (trustAllCerts[0]));
+        }
+        okHttpClient = builder.hostnameVerifier((String hostname, SSLSession session) -> true)
                 .followSslRedirects(false)
                 .connectTimeout(TIME_OUT, TimeUnit.SECONDS)
-                .readTimeout(TIME_OUT, TimeUnit.SECONDS)
-                .build();
+                .readTimeout(TIME_OUT, TimeUnit.SECONDS).build();
     }
 
     private static Headers emptyHeaders(){
